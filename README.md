@@ -1,1 +1,1 @@
-# INF1761-Projeto3
+# ComputacaoGrafica
