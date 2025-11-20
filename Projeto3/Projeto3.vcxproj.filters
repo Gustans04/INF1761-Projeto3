@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="arcball.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="camera2d.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="camera3d.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="color.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="computeshader.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="cube.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="disk.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="error.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="framebuffer.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="grid.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="light.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="main_3d.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="material.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="node.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="polyoffset.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="quad.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="skybox.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="sphere.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="state.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="texcube.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="texbuffer.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="texdepth.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="transform.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="triangle.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="appearance.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="camera2d.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="color.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="computeshader.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="disk.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="error.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="grid.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="node.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="quad.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="shape.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="skybox.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="state.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="texcube.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="transform.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="triangle.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="header files">
+      <UniqueIdentifier>{bcb9bdf0-385b-458a-81c2-bc8d9264857b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source files">
+      <UniqueIdentifier>{bb06224d-ba30-4713-b36a-dd5807bbbb40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{7d35b484-22b7-4805-9b38-fc9ec283aade}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="models">
+      <UniqueIdentifier>{35a31909-e52a-4e13-a135-2bd3dec78699}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="models\Skull.jpg">
+      <Filter>models</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="models\skull.mtl">
+      <Filter>models</Filter>
+    </None>
+  </ItemGroup>
+</Project>

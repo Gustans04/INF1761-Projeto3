@@ -10,7 +10,11 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <sstream>
 #include <cstdlib>
+#include <map>
+#include <tuple>
+#include <glm/glm.hpp>
 
 MeshPtr Mesh::Make (const std::string& filename)
 {
@@ -22,54 +26,151 @@ MeshPtr Mesh::Make ()
   return MeshPtr(new Mesh());
 }
 
-Mesh::Mesh (const std::string& filename)
-: m_nind(0)
+Mesh::Mesh(const std::string& filename)
 {
-  std::vector<float> coords;
-  std::vector<float> normals;
-  std::vector<unsigned int> indices;
-  // read file
-  std::fstream fp;
-  fp.open(filename,std::ios::in);
-  if (!fp) {
-    std::cerr << "Could not open file: " << filename << std::endl;
-    exit(1);
-  }
-  while (!fp.eof()) {
-    char c;
-    float x, y, z;
-    unsigned int i, j, k;
-    fp >> c;
-    switch (c) {
-      case 'V':
-        fp >> x >> y >> z;
-        coords.push_back(x);
-        coords.push_back(y);
-        coords.push_back(z);
-      break;
-      case 'N':
-        fp >> x >> y >> z;
-        normals.push_back(x);
-        normals.push_back(y);
-        normals.push_back(z);
-      break;
-      case 'T':
-        fp >> i >> j >> k;
-        indices.push_back(i);
-        indices.push_back(j);
-        indices.push_back(k);
-      break;
-    }
-  }
-  fp.close();
-  m_nind = (unsigned int)(indices.size());
+    std::vector<glm::vec3> temp_positions;
+    std::vector<glm::vec3> temp_normals;
+    std::vector<glm::vec2> temp_uvs;
 
-  // create VAO
-  glGenVertexArrays(1,&m_vao);
-  SetCoordBuffer(int(coords.size()),coords.data(),3,0);
-  SetNormalBuffer(int(normals.size()),normals.data(),3,0);
-  SetIndexBuffer(int(indices.size()),indices.data());
+    struct Vertex {
+        glm::vec3 pos;
+        glm::vec3 normal;
+        glm::vec2 uv;
+        bool operator<(const Vertex& other) const {
+            return memcmp(this, &other, sizeof(Vertex)) < 0;
+        }
+    };
+
+    std::map<Vertex, unsigned int> vertexToIndex;
+    std::vector<Vertex> finalVertices;
+    std::vector<unsigned int> finalIndices;
+
+    std::ifstream fp(filename);
+    if (!fp) {
+        std::cerr << "Could not open OBJ file: " << filename << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    while (std::getline(fp, line)) {
+        std::stringstream ss(line);
+        std::string type;
+        ss >> type;
+
+        if (type == "v") {
+            glm::vec3 v;
+            ss >> v.x >> v.y >> v.z;
+            temp_positions.push_back(v);
+        }
+        else if (type == "vt") {
+            glm::vec2 uv;
+            ss >> uv.x >> uv.y;
+            temp_uvs.push_back(uv);
+        }
+        else if (type == "vn") {
+            glm::vec3 n;
+            ss >> n.x >> n.y >> n.z;
+            temp_normals.push_back(n);
+        }
+        else if (type == "f") {
+            std::vector<std::string> tokens;
+            std::string tok;
+            while (ss >> tok)
+                tokens.push_back(tok);
+
+            if (tokens.size() < 3) continue;
+
+            for (int k = 1; k < tokens.size() - 1; k++) {
+                std::string vs[3] = { tokens[0], tokens[k], tokens[k + 1] };
+
+                for (int i = 0; i < 3; i++) {
+                    unsigned int vi = 0, ti = 0, ni = 0;
+
+                    std::stringstream fs(vs[i]);
+                    std::string s;
+                    int idx = 0;
+                    while (std::getline(fs, s, '/')) {
+                        if (!s.empty()) {
+                            if (idx == 0) vi = std::stoi(s) - 1;
+                            else if (idx == 1) ti = std::stoi(s) - 1;
+                            else if (idx == 2) ni = std::stoi(s) - 1;
+                        }
+                        idx++;
+                    }
+
+                    Vertex vert{};
+                    vert.pos = temp_positions[vi];
+
+                    vert.uv = (ti < temp_uvs.size()) ? temp_uvs[ti] : glm::vec2(0.0f);
+                    vert.normal = (ni < temp_normals.size()) ? temp_normals[ni] : glm::vec3(0.0f);
+
+                    if (vertexToIndex.count(vert) == 0) {
+                        vertexToIndex[vert] = (unsigned int)finalVertices.size();
+                        finalVertices.push_back(vert);
+                    }
+
+                    finalIndices.push_back(vertexToIndex[vert]);
+                }
+            }
+        }
+    }
+    fp.close();
+
+    if (temp_normals.empty()) {
+        std::cout << "[OBJ loader] Warning: OBJ has no normals. Generating flat normals.\n";
+
+        std::vector<glm::vec3> genNormals(finalVertices.size(), glm::vec3(0));
+
+        for (int i = 0; i < finalIndices.size(); i += 3) {
+            unsigned int i0 = finalIndices[i];
+            unsigned int i1 = finalIndices[i + 1];
+            unsigned int i2 = finalIndices[i + 2];
+
+            glm::vec3 a = finalVertices[i1].pos - finalVertices[i0].pos;
+            glm::vec3 b = finalVertices[i2].pos - finalVertices[i0].pos;
+            glm::vec3 n = glm::normalize(glm::cross(a, b));
+
+            genNormals[i0] += n;
+            genNormals[i1] += n;
+            genNormals[i2] += n;
+        }
+
+        for (int i = 0; i < finalVertices.size(); i++)
+            finalVertices[i].normal = glm::normalize(genNormals[i]);
+    }
+
+    std::vector<float> coords;
+    std::vector<float> normals;
+    std::vector<float> texcoords;
+
+    for (auto& v : finalVertices) {
+        coords.push_back(v.pos.x);
+        coords.push_back(v.pos.y);
+        coords.push_back(v.pos.z);
+
+        normals.push_back(v.normal.x);
+        normals.push_back(v.normal.y);
+        normals.push_back(v.normal.z);
+
+        texcoords.push_back(v.uv.x);
+        texcoords.push_back(v.uv.y);
+    }
+
+    glGenVertexArrays(1, &m_vao);
+    glBindVertexArray(m_vao);
+
+    if (!coords.empty())
+        SetCoordBuffer((int)coords.size(), coords.data(), 3, 0);
+
+    if (!normals.empty())
+        SetNormalBuffer((int)normals.size(), normals.data(), 3, 0);
+
+    if (!texcoords.empty())
+        SetTexCoordBuffer((int)texcoords.size(), texcoords.data(), 2, 0);
+
+    SetIndexBuffer((int)finalIndices.size(), finalIndices.data());
 }
+
 
 Mesh::Mesh () 
 {

@@ -23,6 +23,7 @@
 #include "light.h"
 #include "texcube.h"
 #include "skybox.h"
+#include "mesh.h"
 
 #include <iostream>
 #include <cassert>
@@ -210,12 +211,12 @@ static void initialize (void)
   shd_sky->Link();
 
   //Moon setup
-  auto moonSpriteTex = Texture::Make("decal", "images/moonmap.jpg");
+  auto moonSpriteTex = Texture::Make("decal", "models/skull.jpg");
   auto moonNormalTex = Texture::Make("normalMap", "images/moon-normal.png");
   auto moonTrf = Transform::Make();
-  moonTrf->Scale(0.1f, 0.1f, 0.1f);
-  moonTrf->Rotate(90.0f, 1, 0, 0); // Tilt Moon axis
-  auto moon = Node::Make(shd_bump, moonTrf, { moonSpriteTex, moonNormalTex, white }, { Sphere::Make() }); //General and Sprite Node
+  moonTrf->Scale(0.01f, 0.01f, 0.01f);
+  moonTrf->Rotate(-90.0f, 0, 0, 1); // Tilt Moon axis
+  auto moon = Node::Make(shd_tex, moonTrf, { moonSpriteTex, white }, { Mesh::Make("models/skull.obj")}); //General and Sprite Node
 
   //Earth Setup
   auto earthSpriteTex = Texture::Make("decal", "images/earth.jpg");
