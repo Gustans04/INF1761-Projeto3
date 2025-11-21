@@ -137,13 +137,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\CG\glfw-3.4.bin.WIN64\include;D:\CG\glm-master;D:\CG\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\CG\glfw-3.4.bin.WIN64\include;D:\CG\glm-master;D:\CG\include;D:\coisas\codigos vs\inf1761\libs;D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\CG\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\lib-vc2022;D:\CG\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -154,12 +154,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\include;C:\Users\gugab\Downloads\libs\glad\glad;C:\Users\gugab\Downloads\libs\glad;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\include;C:\Users\gugab\Downloads\libs\glad\glad;C:\Users\gugab\Downloads\libs\glad;%(AdditionalIncludeDirectories);D:\coisas\codigos vs\inf1761\libs;D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\lib-vc2022;C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -169,13 +169,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\CG\glfw-3.4.bin.WIN64\include;D:\CG\glm-master;D:\CG\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\CG\glfw-3.4.bin.WIN64\include;D:\CG\glm-master;D:\CG\include;D:\coisas\codigos vs\inf1761\libs;D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\CG\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\lib-vc2022;D:\CG\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -186,12 +186,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\include;C:\Users\gugab\Downloads\libs\glad\glad;C:\Users\gugab\Downloads\libs\glad;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\include;C:\Users\gugab\Downloads\libs\glad\glad;C:\Users\gugab\Downloads\libs\glad;%(AdditionalIncludeDirectories);D:\coisas\codigos vs\inf1761\libs;D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\coisas\codigos vs\inf1761\libs\glfw-3.4.bin.WIN64\lib-vc2022;C:\Users\gugab\Downloads\libs\glad\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

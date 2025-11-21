@@ -24,6 +24,7 @@
 #include "texcube.h"
 #include "skybox.h"
 #include "mesh.h"
+#include "cube.h"
 
 #include <iostream>
 #include <cassert>
@@ -31,6 +32,7 @@
 static float viewer_pos[3] = {0.0f, 0.0f, 10.0f};
 
 static ScenePtr scene;
+static ScenePtr reflector;
 static Camera3DPtr camera;        // Main camera
 static Camera3DPtr earth_camera;  // Earth-Moon view camera
 static ArcballPtr arcball;        // Active arcball
@@ -165,7 +167,7 @@ public:
 
 static void initialize (void)
 {
-  glClearColor(0, 0, 0, 1);
+  glClearColor(1.0f,1.0f,1.0f,1.0f);
   // enable depth test 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);  // cull back faces
@@ -182,6 +184,8 @@ static void initialize (void)
 
   MaterialPtr white = Material::Make(1.0f,1.0f,1.0f);
   white->SetSpecular(0.0f,0.0f,0.0f); // remove pontos de brilho nos astros
+
+  MaterialPtr reflection = Material::Make(1.0f,1.0f,1.0f, 0.5f);
 
   LightPtr sunLight = Light::Make(0.0f, 0.0f, 0.0f, 1.0f, "object");
 
@@ -209,6 +213,12 @@ static void initialize (void)
   shd_sky->AttachVertexShader("./shaders/ilum_vert/vertex_skybox.glsl");
   shd_sky->AttachFragmentShader("./shaders/ilum_vert/fragment_skybox.glsl");
   shd_sky->Link();
+
+  // Create a shader for planar reflection
+  ShaderPtr shd_reflect = Shader::Make(sunLight,"world");
+  shd_reflect->AttachVertexShader("./shaders/ilum_vert/vertex_reflect.glsl");
+  shd_reflect->AttachFragmentShader("./shaders/ilum_vert/fragment_reflect.glsl");
+  shd_reflect->Link();
 
   //Moon setup
   auto moonSpriteTex = Texture::Make("decal", "models/skull.jpg");
@@ -238,6 +248,10 @@ static void initialize (void)
   
   auto mercurySprite = Node::Make(shd_tex, mercurySpriteTrf, { mercurySpriteTex, white }, { Sphere::Make() }); //Mercury Sprite Node
   auto mercury = Node::Make({mercurySprite}); //General Mercury Node
+
+  auto platformSpriteTrf = Transform::Make();
+  auto platformSprite = Node::Make(shd_reflect, platformSpriteTrf, { reflection }, { Cube::Make() }); //Platform Node
+  auto platform = Node::Make({platformSprite}); //General Platform Node
   
   //Sun Setup
   auto sunSpriteTex = Texture::Make("decal", "images/sunmap.jpg");
@@ -257,9 +271,16 @@ static void initialize (void)
   ShapePtr skybox = SkyBox::Make();
   auto skyboxNode = Node::Make(shd_sky, { white,sky }, { skybox });
 
+  // Reflection trf
+  auto reflectTrf = Transform::Make();
+  reflectTrf->Rotate(90.0f, 1, 0, 0);
+  reflectTrf->Translate(0.0f, -1.1f, 0.0f);
+  reflectTrf->Scale(10.0f, 0.1f, 10.0f);  
+
   // build scene
-  auto root = Node::Make({ skyboxNode, sun });
+  auto root = Node::Make({ sun });
   scene = Scene::Make(root);
+  reflector = Scene::Make(Node::Make(shd_reflect, reflectTrf, { reflection }, { platform }));
   scene->AddEngine(OrbitTranslation::Make(earthOrbitTrf, 3.5f, 10.0f));
   scene->AddEngine(OrbitTranslation::Make(moonOrbitTrf, 0.8f, 20.0f));
   scene->AddEngine(OrbitTranslation::Make(mercuryOrbitTrf, 2.0f, 55.0f));
@@ -272,11 +293,39 @@ static void initialize (void)
 
 static void display (GLFWwindow* win)
 { 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window 
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window 
     Error::Check("before render");
+
+    // ’’ desenha ’’ refletor no stencil
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NEVER, 1, 0xFFFF);
+    glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+    reflector->Render(using_earth_camera ? earth_camera : camera);
+
+    // desenha cena refletida
+    glStencilFunc(GL_EQUAL, 1, 0xFFFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    NodePtr root = scene->GetRoot();
+    TransformPtr trf = Transform::Make();
+    trf->LoadIdentity();
+    trf->Translate(0.0f, 0.0f, -2.2f);
+    trf->Scale(1.0f, 1.0f, -1.0f);
+    root->SetTransform(trf);
+    glFrontFace(GL_CW); // invert front face incidence
+    scene->Render(using_earth_camera ? earth_camera : camera);
+    glFrontFace(GL_CCW); // restore front face incidence
+    root->SetTransform(nullptr);
+    glDisable(GL_STENCIL_TEST);
+
     
     // Render with the active camera
     scene->Render(using_earth_camera ? earth_camera : camera);
+
+    // desenha plataforma refletora
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    reflector->Render(using_earth_camera ? earth_camera : camera);
+    glDisable(GL_BLEND);
     
     Error::Check("after render");
 }
