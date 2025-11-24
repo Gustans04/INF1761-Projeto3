@@ -202,6 +202,13 @@ static void initialize (void)
   shd_tex->AttachFragmentShader("./shaders/ilum_vert/fragment_texture.glsl");
   shd_tex->Link();
 
+  // Create a shader with geometry shader for special effects
+  ShaderPtr shd_geom = Shader::Make(sunLight,"world");
+  shd_geom->AttachVertexShader("./shaders/ilum_vert/vertex_geometry.glsl");
+  shd_geom->AttachGeometryShader("./shaders/ilum_vert/geometry_texture.glsl");
+  shd_geom->AttachFragmentShader("./shaders/ilum_vert/fragment_geometry.glsl");
+  shd_geom->Link();
+
   // Create a shader with bump mapping
   ShaderPtr shd_bump = Shader::Make(sunLight,"world");
   shd_bump->AttachVertexShader("./shaders/ilum_vert/vertex_bump.glsl");
@@ -246,7 +253,7 @@ static void initialize (void)
   mercurySpriteTrf->Scale(0.2f, 0.2f, 0.2f);
   mercurySpriteTrf->Rotate(90.0f, 1, 0, 0); // Tilt Mercury axis
   
-  auto mercurySprite = Node::Make(shd_tex, mercurySpriteTrf, { mercurySpriteTex, white }, { Sphere::Make() }); //Mercury Sprite Node
+  auto mercurySprite = Node::Make(shd_geom, mercurySpriteTrf, { mercurySpriteTex, white }, { Sphere::Make() }); //Mercury Sprite Node
   auto mercury = Node::Make({mercurySprite}); //General Mercury Node
 
   auto platformSpriteTrf = Transform::Make();
