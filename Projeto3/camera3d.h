@@ -36,6 +36,9 @@ public:
   virtual glm::mat4 GetProjMatrix () const;
   virtual glm::mat4 GetViewMatrix () const;
   virtual void Load (StatePtr st) const;
+  glm::vec3 GetEye() const { return m_eye; };
+  glm::vec3 GetCenter() const { return m_center; };
+  glm::vec3 GetUpDir() const { return m_up; };
 };
 
 #endif

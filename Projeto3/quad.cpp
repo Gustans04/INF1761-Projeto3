@@ -1,8 +1,5 @@
-#include "quad.h"
+﻿#include "quad.h"
 #include "error.h"
-#include "grid.h"
-
-#include <iostream>
 
 #ifdef _WIN32
 #include <glad/glad.h>
@@ -10,53 +7,88 @@
 #include <OpenGL/gl3.h>
 #endif
 
-QuadPtr Quad::Make(int nx, int ny)
+QuadPtr Quad::Make()
 {
-    return QuadPtr(new Quad(nx, ny));
+    return QuadPtr(new Quad());
 }
 
-Quad::Quad(int nx, int ny)
+Quad::Quad()
 {
-    GridPtr grid = Grid::Make(nx, ny);
-    m_nind = grid->IndexCount();
+    // Quad no plano XY, normal +Z.
+    // Tamanho 1x1, centrado.
+    float coords[] = {
+        -0.5f, -0.5f, 0.0f,   // v0 (inferior esquerdo)
+         0.5f, -0.5f, 0.0f,   // v1 (inferior direito)
+         0.5f,  0.5f, 0.0f,   // v2 (superior direito)
+        -0.5f,  0.5f, 0.0f    // v3 (superior esquerdo)
+    };
 
+    // Normal → virado para o +Z
+    float normals[] = {
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f
+    };
+
+    // Tangente → direção +X
+    float tangents[] = {
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f
+    };
+
+    // UV layout padrão
+    float texcoords[] = {
+        0.0f, 0.0f,  // v0
+        1.0f, 0.0f,  // v1
+        1.0f, 1.0f,  // v2
+        0.0f, 1.0f   // v3
+    };
+
+    // Triângulos em ordem anti-horária, vistos do +Z
+    unsigned int indices[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    // ---- VAO ----
     glGenVertexArrays(1, &m_vao);
     glBindVertexArray(m_vao);
 
-    GLuint vbo[2];
-    glGenBuffers(2, vbo);
+    GLuint id[4];
+    glGenBuffers(4, id);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-    glBufferData(GL_ARRAY_BUFFER, 2 * grid->VertexCount() * sizeof(float),
-        grid->GetCoords(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // posi��o (x, y)
+    // posições
+    glBindBuffer(GL_ARRAY_BUFFER, id[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(coords), coords, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
-    // --- Coordenadas de textura ---
-    float* texcoords = new float[2 * grid->VertexCount()];
-    for (int i = 0; i < grid->VertexCount(); ++i)
-    {
-        float x = grid->GetCoords()[2 * i];
-        float y = grid->GetCoords()[2 * i + 1];
-        texcoords[2 * i] = (x + 1.0f) / 2.0f;
-        texcoords[2 * i + 1] = (y + 1.0f) / 2.0f;
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, 2 * grid->VertexCount() * sizeof(float),
-        texcoords, GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0); // texcoord
+    // normais
+    glBindBuffer(GL_ARRAY_BUFFER, id[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(1);
 
-    delete[] texcoords;
+    // tangentes
+    glBindBuffer(GL_ARRAY_BUFFER, id[2]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(tangents), tangents, GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
 
+    // UV
+    glBindBuffer(GL_ARRAY_BUFFER, id[3]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(3);
+
+    // índices
     GLuint index;
     glGenBuffers(1, &index);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-        m_nind * sizeof(unsigned int),
-        grid->GetIndices(),
-        GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
 Quad::~Quad()
@@ -66,5 +98,5 @@ Quad::~Quad()
 void Quad::Draw(StatePtr)
 {
     glBindVertexArray(m_vao);
-    glDrawElements(GL_TRIANGLES, m_nind, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

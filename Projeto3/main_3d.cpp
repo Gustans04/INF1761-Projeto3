@@ -25,11 +25,12 @@
 #include "skybox.h"
 #include "mesh.h"
 #include "cube.h"
+#include "ClipPlane.h"
 
 #include <iostream>
 #include <cassert>
 
-static float viewer_pos[3] = {0.0f, 0.0f, 10.0f};
+static float viewer_pos[3] = {0.0f, 0.0f, 2.0f};
 
 static ScenePtr scene;
 static ScenePtr reflector;
@@ -187,7 +188,7 @@ static void initialize (void)
 
   MaterialPtr reflection = Material::Make(1.0f,1.0f,1.0f, 0.5f);
 
-  LightPtr sunLight = Light::Make(0.0f, 0.0f, 0.0f, 1.0f, "object");
+  LightPtr sunLight = Light::Make(0.0f, 5.0f, 2.0f, 1.0f, "world");
 
   // create shader for sun that is allways fully lit
   ShaderPtr shd_sun = Shader::Make(nullptr, "world");
@@ -227,13 +228,15 @@ static void initialize (void)
   shd_reflect->AttachFragmentShader("./shaders/ilum_vert/fragment_reflect.glsl");
   shd_reflect->Link();
 
+  /*
   //Moon setup
   auto moonSpriteTex = Texture::Make("decal", "models/skull.jpg");
   auto moonNormalTex = Texture::Make("normalMap", "images/moon-normal.png");
   auto moonTrf = Transform::Make();
   moonTrf->Scale(0.01f, 0.01f, 0.01f);
   moonTrf->Rotate(-90.0f, 0, 0, 1); // Tilt Moon axis
-  auto moon = Node::Make(shd_tex, moonTrf, { moonSpriteTex, white }, { Mesh::Make("models/skull.obj")}); //General and Sprite Node
+  auto moon = Node::Make(shd_tex, moonTrf, { moonSpriteTex, white }, { Sphere::Make()}); //General and Sprite Node
+  //auto moon = Node::Make(shd_tex, moonTrf, { moonSpriteTex, white }, { Mesh::Make("models/skull.obj")}); //General and Sprite Node
 
   //Earth Setup
   auto earthSpriteTex = Texture::Make("decal", "images/earth.jpg");
@@ -256,9 +259,7 @@ static void initialize (void)
   auto mercurySprite = Node::Make(shd_geom, mercurySpriteTrf, { mercurySpriteTex, white }, { Sphere::Make() }); //Mercury Sprite Node
   auto mercury = Node::Make({mercurySprite}); //General Mercury Node
 
-  auto platformSpriteTrf = Transform::Make();
-  auto platformSprite = Node::Make(shd_reflect, platformSpriteTrf, { reflection }, { Cube::Make() }); //Platform Node
-  auto platform = Node::Make({platformSprite}); //General Platform Node
+
   
   //Sun Setup
   auto sunSpriteTex = Texture::Make("decal", "images/sunmap.jpg");
@@ -276,26 +277,49 @@ static void initialize (void)
   //SkyBox Setup
   AppearancePtr sky = TexCube::Make("sky", "images/space.png");
   ShapePtr skybox = SkyBox::Make();
-  auto skyboxNode = Node::Make(shd_sky, { white,sky }, { skybox });
+  auto skyboxNode = Node::Make(shd_sky, { white,sky }, { skybox });*/
+
+
+  //Skull setup
+  auto skullSpriteTex = Texture::Make("decal", "models/Skull.jpg");
+  auto skullTrf = Transform::Make();
+  skullTrf->Translate(0.0f, 1.5f, 0.0f);
+  skullTrf->Scale(0.01f, 0.01f, 0.01f);
+  skullTrf->Rotate(-90.0f, 1.0f, 0.0f, 0.0f);
+  auto skull = Node::Make(shd_tex, skullTrf, { skullSpriteTex, white }, { Mesh::Make("models/skull.obj") }); //General and Sprite Node
+
+  //Mercury Setup
+  auto mercurySpriteTex = Texture::Make("decal", "images/mercurymap.jpg");
+  auto mercurySpriteTrf = Transform::Make();
+  mercurySpriteTrf->Scale(0.5f, 0.5f, 0.5f);
+  mercurySpriteTrf->Translate(0.0f, 5.0f, 0.0f);
+
+  auto mercurySprite = Node::Make(shd_geom, mercurySpriteTrf, { mercurySpriteTex, white }, { Sphere::Make(32,32) }); //Mercury Sprite Node
+  auto mercury = Node::Make({ mercurySprite }); //General Mercury Node
+
+  //Table setup
+  auto tableSpriteTex = Texture::Make("decal", "models/table.png");
+  auto tableNormalTex = Texture::Make("normalMap", "models/table_nrm.jpg");
+  auto tableTrf = Transform::Make();
+  tableTrf->Translate(0.0f, -0.5f, 0.0f);
+  tableTrf->Scale(0.5f, 0.5f, 0.5f);
+  auto table = Node::Make(shd_tex, tableTrf, { tableSpriteTex,tableNormalTex, white }, { Mesh::Make("models/table.obj") }, { skull, mercury }); //General and Sprite Node
+
+  auto platformSpriteTrf = Transform::Make();
+  auto platformSprite = Node::Make(shd_reflect, platformSpriteTrf, { reflection }, { Quad::Make() }); //Platform Node
+  auto platform = Node::Make({ platformSprite }); //General Platform Node
 
   // Reflection trf
   auto reflectTrf = Transform::Make();
-  reflectTrf->Rotate(90.0f, 1, 0, 0);
-  reflectTrf->Translate(0.0f, -1.1f, 0.0f);
-  reflectTrf->Scale(10.0f, 0.1f, 10.0f);  
+  //reflectTrf->Rotate(90.0f, 1, 0, 0);
+  reflectTrf->Translate(0.0f, 0.0f, -1.1f);
+  reflectTrf->Scale(5.0f, 5.0f, 0.1f);  
 
   // build scene
-  auto root = Node::Make({ sun });
+  auto root = Node::Make({ table });
   scene = Scene::Make(root);
   reflector = Scene::Make(Node::Make(shd_reflect, reflectTrf, { reflection }, { platform }));
-  scene->AddEngine(OrbitTranslation::Make(earthOrbitTrf, 3.5f, 10.0f));
-  scene->AddEngine(OrbitTranslation::Make(moonOrbitTrf, 0.8f, 20.0f));
-  scene->AddEngine(OrbitTranslation::Make(mercuryOrbitTrf, 2.0f, 55.0f));
-  scene->AddEngine(PlanetRotation::Make(earthSpriteTrf, 100.0f));
-  scene->AddEngine(PlanetRotation::Make(moonTrf, 50.0f));
-  scene->AddEngine(PlanetRotation::Make(mercurySpriteTrf, 80.0f));
-  scene->AddEngine(PlanetRotation::Make(sunSpriteTrf, 25.0f));
-  scene->AddEngine(MoonCamera::Make(earthCameraTrf, 3.5f, 0.8f, 10.0f, 20.0f));
+
 }
 
 static void display (GLFWwindow* win)

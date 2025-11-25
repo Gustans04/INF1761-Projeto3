@@ -22,6 +22,7 @@
     <ClCompile Include="arcball.cpp" />
     <ClCompile Include="camera2d.cpp" />
     <ClCompile Include="camera3d.cpp" />
+    <ClCompile Include="ClipPlane.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="computeshader.cpp" />
     <ClCompile Include="cube.cpp" />
@@ -53,8 +54,10 @@
   <ItemGroup>
     <ClInclude Include="appearance.h" />
     <ClInclude Include="camera2d.h" />
+    <ClInclude Include="ClipPlane.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="computeshader.h" />
+    <ClInclude Include="cube.h" />
     <ClInclude Include="disk.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="error.h" />
@@ -78,6 +81,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="models\skull.mtl" />
+    <None Include="shaders\ilum_vert\fragment.glsl" />
+    <None Include="shaders\ilum_vert\fragment_bump.glsl" />
+    <None Include="shaders\ilum_vert\fragment_geometry.glsl" />
+    <None Include="shaders\ilum_vert\fragment_reflect.glsl" />
+    <None Include="shaders\ilum_vert\fragment_shadow.glsl" />
+    <None Include="shaders\ilum_vert\fragment_skybox.glsl" />
+    <None Include="shaders\ilum_vert\fragment_sun.glsl" />
+    <None Include="shaders\ilum_vert\fragment_texture.glsl" />
+    <None Include="shaders\ilum_vert\geometry_texture.glsl" />
+    <None Include="shaders\ilum_vert\vertex.glsl" />
+    <None Include="shaders\ilum_vert\vertex_bump.glsl" />
+    <None Include="shaders\ilum_vert\vertex_geometry.glsl" />
+    <None Include="shaders\ilum_vert\vertex_reflect.glsl" />
+    <None Include="shaders\ilum_vert\vertex_shadow.glsl" />
+    <None Include="shaders\ilum_vert\vertex_skybox.glsl" />
+    <None Include="shaders\ilum_vert\vertex_sun.glsl" />
+    <None Include="shaders\ilum_vert\vertex_texture.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
