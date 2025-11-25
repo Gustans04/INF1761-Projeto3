@@ -7,12 +7,11 @@ const float factor = 0.9f;
 
 uniform vec4 lpos; // light pos in eye space
 uniform mat4 Mv;
-uniform mat4 Nm;
+uniform mat4 Mn;
 uniform mat4 Mvp;
 
 in data {
     vec3 pos;
-    vec3 normal;
     vec2 texcoord;
 } f[];
 
@@ -29,7 +28,6 @@ void main (void)
     for (int i = 0; i < gl_in.length(); i++) {
         cg += f[i].pos;
     }
-    cg /= float(gl_in.length());
     
     for (int i = 0; i < gl_in.length(); i++) {
         vec3 pos = cg + factor * (f[i].pos - cg);
@@ -40,7 +38,7 @@ void main (void)
             v.fragLightDir = normalize(vec3(lpos));
         else
             v.fragLightDir = normalize(vec3(lpos) - veye);
-        v.fragNormal = normalize(vec3(Nm * vec4(f[i].normal, 0.0f)));
+        v.fragNormal = normalize(vec3(Mn * vec4(pos, 0.0f)));
         v.texcoord = f[i].texcoord;
         
         gl_Position = Mvp * vec4(pos, 1.0f);
