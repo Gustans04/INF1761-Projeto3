@@ -11,18 +11,14 @@
 #include "scene.h"
 #include "state.h"
 #include "camera3d.h"
-#include "color.h"
 #include "material.h"
 #include "transform.h"
 #include "error.h"
 #include "shader.h"
-#include "triangle.h"
 #include "sphere.h"
 #include "texture.h"
 #include "quad.h"
 #include "light.h"
-#include "texcube.h"
-#include "skybox.h"
 #include "mesh.h"
 #include "cube.h"
 #include "ClipPlane.h"
@@ -35,136 +31,7 @@ static float viewer_pos[3] = {0.0f, 0.0f, 2.0f};
 static ScenePtr scene;
 static ScenePtr reflector;
 static Camera3DPtr camera;        // Main camera
-static Camera3DPtr earth_camera;  // Earth-Moon view camera
 static ArcballPtr arcball;        // Active arcball
-static ArcballPtr sun_arcball;    // Sun arcball
-static ArcballPtr earth_arcball;  // Earth-Moon camera arcball
-static bool using_earth_camera = false;  // Camera switch flag
-
-class OrbitTranslation;
-using OrbitTranslationPtr = std::shared_ptr<OrbitTranslation>;
-
-class OrbitTranslation : public Engine
-{
-    TransformPtr m_trf;
-    float m_radius;
-    float m_angle;
-    float m_speed;
-
-protected:
-    OrbitTranslation(TransformPtr trf, float radius, float speed)
-        : m_trf(trf), m_radius(radius), m_speed(speed), m_angle(0.0f)
-    {
-    }
-
-public:
-    static OrbitTranslationPtr Make(TransformPtr trf, float radius, float speed)
-    {
-        return OrbitTranslationPtr(new OrbitTranslation(trf, radius, speed));
-    }
-
-    virtual void Update(float dt)
-    {
-        m_angle += m_speed * -dt;
-
-        m_trf->LoadIdentity();
-        m_trf->Rotate(m_angle, 0, 0, 1);
-        m_trf->Translate(m_radius, 0.0f, 0.0f);
-    }
-};
-
-class PlanetRotation;
-using PlanetRotationPtr = std::shared_ptr<PlanetRotation>;
-
-class PlanetRotation : public Engine
-{
-    TransformPtr m_trf;
-    float m_speed;
-
-protected:
-    PlanetRotation(TransformPtr trf, float speed)
-        : m_trf(trf), m_speed(speed)
-    {
-    }
-
-public:
-    static PlanetRotationPtr Make(TransformPtr trf, float speed)
-    {
-        return PlanetRotationPtr(new PlanetRotation(trf, speed));
-    }
-
-    virtual void Update(float dt)
-    {
-        m_trf->Rotate(m_speed * -dt, 0, 1, 0);
-    }
-};
-
-class MoonCamera;
-using MoonCameraPtr = std::shared_ptr<MoonCamera>;
-
-class MoonCamera : public Engine
-{
-    TransformPtr m_trf;
-    float m_radius1;
-    float m_radius2;
-    float m_angle1;
-    float m_angle2;
-    float m_speed1;
-    float m_speed2;
-
-protected:
-    MoonCamera(TransformPtr trf, float radius1, float radius2, float speed1, float speed2)
-        : m_trf(trf), m_radius1(radius1), m_radius2(radius2), m_speed1(speed1), m_speed2(speed2), m_angle1(0.0f), m_angle2(0.0f)
-    {
-    }
-
-public:
-    static MoonCameraPtr Make(TransformPtr trf, float radius1, float radius2, float speed1, float speed2)
-    {
-        return MoonCameraPtr(new MoonCamera(trf, radius1, radius2, speed1, speed2));
-    }
-
-    virtual void Update(float dt)
-    {        
-        // // Get Earth's world position
-        // glm::mat4 earthMatrix = earthOrbitTrf->GetMatrix();
-        // glm::vec3 earthPos = glm::vec3(earthMatrix[3]); // Translation component
-
-        // // Get Moon's world position by combining Earth orbit, Moon orbit and Moon transforms
-        // glm::mat4 moonWorldMatrix = earthMatrix * moonOrbitTrf->GetMatrix() * moonTrf->GetMatrix();
-        // glm::vec3 moonPos = glm::vec3(moonWorldMatrix[3]);
-
-        // // Update Earth camera
-        // earth_camera->SetCenter(moonPos.x, moonPos.y, moonPos.z);
-        // earth_camera->SetEye(earthPos.x, earthPos.y, earthPos.z);
-        // earth_camera->SetUpDir(0.0f, 0.0f, 1.0f);
-
-        m_trf->LoadIdentity();
-
-        // Apply Earth orbit transformations to both transforms
-        m_angle1 += m_speed1 * -dt;
-        m_trf->Rotate(m_angle1, 0, 0, 1);
-        m_trf->Translate(m_radius1, 0.0f, 0.0f);
-
-        // Get Earth position from m_trf (which doesn't have Moon rotation)
-        glm::mat4 earthMatrix = m_trf->GetMatrix();
-        glm::vec3 earthPos = glm::vec3(earthMatrix[3]);
-
-        // Continue with Moon rotation
-        m_angle2 += m_speed2 * -dt;
-        m_trf->Rotate(m_angle2, 0, 0, 1);
-        m_trf->Translate(m_radius2, 0.0f, 0.0f);
-
-        // Get Moon position from m_trf (which has all transformations)
-        glm::mat4 moonMatrix = m_trf->GetMatrix();
-        glm::vec3 moonPos = glm::vec3(moonMatrix[3]);
-
-        // Update camera
-        earth_camera->SetEye(earthPos.x, earthPos.y, earthPos.z);
-        earth_camera->SetCenter(moonPos.x, moonPos.y, moonPos.z);
-        earth_camera->SetUpDir(0.0f, 0.0f, 1.0f);
-    }
-};
 
 static void initialize (void)
 {
@@ -175,13 +42,7 @@ static void initialize (void)
 
   // create cameras
   camera = Camera3D::Make(viewer_pos[0], viewer_pos[1], viewer_pos[2]);
-  sun_arcball = camera->CreateArcball();
-  arcball = sun_arcball; // Set active arcball to sun arcball
-
-  // Earth-Moon camera starts at same position but will be updated
-  earth_camera = Camera3D::Make(viewer_pos[0], viewer_pos[1], viewer_pos[2]);
-  earth_arcball = earth_camera->CreateArcball();
-  TransformPtr earthCameraTrf = Transform::Make();
+  arcball = camera->CreateArcball();
 
   MaterialPtr white = Material::Make(1.0f,1.0f,1.0f);
   white->SetSpecular(0.0f,0.0f,0.0f); // remove pontos de brilho nos astros
@@ -189,12 +50,6 @@ static void initialize (void)
   MaterialPtr reflection = Material::Make(1.0f,1.0f,1.0f, 0.5f);
 
   LightPtr sunLight = Light::Make(0.0f, 5.0f, 2.0f, 1.0f, "world");
-
-  // create shader for sun that is allways fully lit
-  ShaderPtr shd_sun = Shader::Make(nullptr, "world");
-  shd_sun->AttachVertexShader("./shaders/ilum_vert/vertex_sun.glsl");
-  shd_sun->AttachFragmentShader("./shaders/ilum_vert/fragment_sun.glsl");
-  shd_sun->Link();
 
   // Define a different shader for texture mapping
   // An alternative would be to use only this shader with a "white" texture for untextured objects
@@ -216,69 +71,11 @@ static void initialize (void)
   shd_bump->AttachFragmentShader("./shaders/ilum_vert/fragment_bump.glsl");
   shd_bump->Link();
 
-  //create shader for skybox
-  ShaderPtr shd_sky = Shader::Make();
-  shd_sky->AttachVertexShader("./shaders/ilum_vert/vertex_skybox.glsl");
-  shd_sky->AttachFragmentShader("./shaders/ilum_vert/fragment_skybox.glsl");
-  shd_sky->Link();
-
   // Create a shader for planar reflection
   ShaderPtr shd_reflect = Shader::Make(sunLight,"world");
   shd_reflect->AttachVertexShader("./shaders/ilum_vert/vertex_reflect.glsl");
   shd_reflect->AttachFragmentShader("./shaders/ilum_vert/fragment_reflect.glsl");
   shd_reflect->Link();
-
-  /*
-  //Moon setup
-  auto moonSpriteTex = Texture::Make("decal", "models/skull.jpg");
-  auto moonNormalTex = Texture::Make("normalMap", "images/moon-normal.png");
-  auto moonTrf = Transform::Make();
-  moonTrf->Scale(0.01f, 0.01f, 0.01f);
-  moonTrf->Rotate(-90.0f, 0, 0, 1); // Tilt Moon axis
-  auto moon = Node::Make(shd_tex, moonTrf, { moonSpriteTex, white }, { Sphere::Make()}); //General and Sprite Node
-  //auto moon = Node::Make(shd_tex, moonTrf, { moonSpriteTex, white }, { Mesh::Make("models/skull.obj")}); //General and Sprite Node
-
-  //Earth Setup
-  auto earthSpriteTex = Texture::Make("decal", "images/earth.jpg");
-  auto earthNormalTex = Texture::Make("normalMap", "images/earth-normal.png");
-  auto earthSpriteTrf = Transform::Make();
-  auto moonOrbitTrf = Transform::Make();  // Store moon orbit transform
-  earthSpriteTrf->Scale(0.4f, 0.4f, 0.4f);
-  earthSpriteTrf->Rotate(90.0f, 1, 0, 0); // Tilt Earth axis
-
-  auto earthSprite = Node::Make(shd_bump, earthSpriteTrf, { earthSpriteTex, earthNormalTex, white }, { Sphere::Make() }); //Earth Sprite Node
-  auto moonOrbit = Node::Make(moonOrbitTrf, { moon });
-  auto earth = Node::Make({earthSprite, moonOrbit}); //General Earth Node
-
-  //Mercury Setup
-  auto mercurySpriteTex = Texture::Make("decal", "images/mercurymap.jpg");
-  auto mercurySpriteTrf = Transform::Make();
-  mercurySpriteTrf->Scale(0.2f, 0.2f, 0.2f);
-  mercurySpriteTrf->Rotate(90.0f, 1, 0, 0); // Tilt Mercury axis
-  
-  auto mercurySprite = Node::Make(shd_geom, mercurySpriteTrf, { mercurySpriteTex, white }, { Sphere::Make() }); //Mercury Sprite Node
-  auto mercury = Node::Make({mercurySprite}); //General Mercury Node
-
-
-  
-  //Sun Setup
-  auto sunSpriteTex = Texture::Make("decal", "images/sunmap.jpg");
-  auto sunSpriteTrf = Transform::Make();
-  auto earthOrbitTrf = Transform::Make();  // Store earth orbit transform
-  auto mercuryOrbitTrf = Transform::Make();
-  sunSpriteTrf->Rotate(90.0f, 1, 0, 0); // Tilt Sun axis
-
-  auto sunSprite = Node::Make(shd_sun, sunSpriteTrf, { sunSpriteTex, white }, { Sphere::Make() }); //Sprite Node
-  auto earthOrbit = Node::Make(earthOrbitTrf, {earth}); //Orbit Node
-  auto mercuryOrbit = Node::Make(mercuryOrbitTrf, {mercury}); //Orbit Node
-
-  auto sun = Node::Make({sunSprite, earthOrbit, mercuryOrbit}); //General Sun Node
-
-  //SkyBox Setup
-  AppearancePtr sky = TexCube::Make("sky", "images/space.png");
-  ShapePtr skybox = SkyBox::Make();
-  auto skyboxNode = Node::Make(shd_sky, { white,sky }, { skybox });*/
-
 
   //Skull setup
   auto skullSpriteTex = Texture::Make("decal", "models/Skull.jpg");
@@ -311,7 +108,6 @@ static void initialize (void)
 
   // Reflection trf
   auto reflectTrf = Transform::Make();
-  //reflectTrf->Rotate(90.0f, 1, 0, 0);
   reflectTrf->Translate(0.0f, 0.0f, -1.1f);
   reflectTrf->Scale(5.0f, 5.0f, 0.1f);  
 
@@ -331,7 +127,7 @@ static void display (GLFWwindow* win)
     glEnable(GL_STENCIL_TEST);
     glStencilFunc(GL_NEVER, 1, 0xFFFF);
     glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-    reflector->Render(using_earth_camera ? earth_camera : camera);
+    reflector->Render(camera);
 
     // desenha cena refletida
     glStencilFunc(GL_EQUAL, 1, 0xFFFF);
@@ -343,19 +139,19 @@ static void display (GLFWwindow* win)
     trf->Scale(1.0f, 1.0f, -1.0f);
     root->SetTransform(trf);
     glFrontFace(GL_CW); // invert front face incidence
-    scene->Render(using_earth_camera ? earth_camera : camera);
+    scene->Render(camera);
     glFrontFace(GL_CCW); // restore front face incidence
     root->SetTransform(nullptr);
     glDisable(GL_STENCIL_TEST);
 
     
     // Render with the active camera
-    scene->Render(using_earth_camera ? earth_camera : camera);
+    scene->Render(camera);
 
     // desenha plataforma refletora
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    reflector->Render(using_earth_camera ? earth_camera : camera);
+    reflector->Render(camera);
     glDisable(GL_BLEND);
     
     Error::Check("after render");
@@ -368,21 +164,10 @@ static void error (int code, const char* msg)
     exit(0);
 }
 
-static void mudar_camera(void)
-{
-    using_earth_camera = !using_earth_camera;
-    
-    // Switch active arcball
-    arcball = using_earth_camera ? earth_arcball : sun_arcball;
-}
-
 static void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   if (key == GLFW_KEY_Q && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
-
-  if (key == GLFW_KEY_E && action == GLFW_PRESS)
-    mudar_camera();
 }
 
 static void resize (GLFWwindow* win, int width, int height)
@@ -413,7 +198,7 @@ static void cursorinit (GLFWwindow* win, double x, double y)
 }
 static void mousebutton (GLFWwindow* win, int button, int action, int mods)
 {
-  if (action == GLFW_PRESS && !using_earth_camera) {
+  if (action == GLFW_PRESS) {
     glfwSetCursorPosCallback(win, cursorinit);     // cursor position callback
   }
   else // GLFW_RELEASE 
