@@ -80,7 +80,7 @@ static void initialize (void)
   //Skull setup
   auto skullSpriteTex = Texture::Make("decal", "models/Skull.jpg");
   auto skullTrf = Transform::Make();
-  skullTrf->Translate(0.0f, 1.5f, 0.0f);
+  skullTrf->Translate(0.5f, 1.45f, 0.0f);
   skullTrf->Scale(0.01f, 0.01f, 0.01f);
   skullTrf->Rotate(-90.0f, 1.0f, 0.0f, 0.0f);
   auto skull = Node::Make(shd_tex, skullTrf, { skullSpriteTex, white }, { Mesh::Make("models/skull.obj") }); //General and Sprite Node
@@ -88,8 +88,8 @@ static void initialize (void)
   //Mercury Setup
   auto mercurySpriteTex = Texture::Make("decal", "images/mercurymap.jpg");
   auto mercurySpriteTrf = Transform::Make();
-  mercurySpriteTrf->Scale(0.5f, 0.5f, 0.5f);
-  mercurySpriteTrf->Translate(0.0f, 5.0f, 0.0f);
+  mercurySpriteTrf->Translate(-0.5f, 1.65f, 0.0f);
+  mercurySpriteTrf->Scale(0.2f, 0.2f, 0.2f);
 
   auto mercurySprite = Node::Make(shd_geom, mercurySpriteTrf, { mercurySpriteTex, white }, { Sphere::Make(32,32) }); //Mercury Sprite Node
   auto mercury = Node::Make({ mercurySprite }); //General Mercury Node
