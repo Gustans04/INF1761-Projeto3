@@ -65,12 +65,6 @@ static void initialize (void)
   shd_geom->AttachFragmentShader("./shaders/ilum_vert/fragment_geometry.glsl");
   shd_geom->Link();
 
-  // Create a shader with bump mapping
-  ShaderPtr shd_bump = Shader::Make(sunLight,"world");
-  shd_bump->AttachVertexShader("./shaders/ilum_vert/vertex_bump.glsl");
-  shd_bump->AttachFragmentShader("./shaders/ilum_vert/fragment_bump.glsl");
-  shd_bump->Link();
-
   // Create a shader for planar reflection
   ShaderPtr shd_reflect = Shader::Make(sunLight,"world");
   shd_reflect->AttachVertexShader("./shaders/ilum_vert/vertex_reflect.glsl");
